@@ -1,22 +1,18 @@
-# استخدام صورة البايثون كأساس
-FROM python:3.8-slim
+#!/bin/bash
 
-# تثبيت Node.js
-RUN apt-get update && \
-    apt-get install -y curl gnupg && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
-    apt-get install -y nodejs
+# تثبيت Node.js (إذا لم يتم تثبيته بالفعل)
+export NVM_DIR="$HOME/.nvm"
+mkdir -p $NVM_DIR
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+. "$NVM_DIR/nvm.sh"
+nvm install 16
+nvm use 16
 
-# تثبيت Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
-    . $HOME/.cargo/env && \
-    rustup default stable && \
-    rustup target add wasm32-unknown-unknown
+# تثبيت Rust (قد لا يعمل في MyBinder)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source $HOME/.cargo/env || echo "Unable to source Rust environment. Please restart the terminal or source manually."
+rustup default stable
+rustup target add wasm32-unknown-unknown
 
-# نسخ ملفات المشروع وتثبيت الاعتماديات
-COPY . /app
-WORKDIR /app
-RUN pip install -r requirements.txt
-
-# تعليمات لبدء التطبيق
-CMD ["python", "app.py"]
+# تثبيت Terrain
+npm install -g @terra-money/terrain
