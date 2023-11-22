@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# تحديث قائمة الحزم
+sudo apt-get update
+
+# تنصيب Node.js v16 و npm
+curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
+sudo apt-get install npm
+
+# تنصيب Rust وتهيئة البيئة
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env || echo "Unable to source Rust environment. Please restart the terminal or source manually."
+
+# إعداد بيئة Rust
+rustup default stable
+rustup target add wasm32-unknown-unknown
+cargo install cargo-generate --features vendored-openssl
+cargo install cargo-run-script
+
+# تنصيب Terrain
+npm install -g @terra-money/terrain
+
+echo "تم إكمال التثبيت!"
