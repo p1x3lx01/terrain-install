@@ -1,24 +1,22 @@
-#!/bin/bash
+# استخدام صورة البايثون كأساس
+FROM python:3.8-slim
 
-# تحديث قائمة الحزم
-sudo apt-get update
+# تثبيت Node.js
+RUN apt-get update && \
+    apt-get install -y curl gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs
 
-# تنصيب Node.js v16 و npm
-curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-sudo apt-get install -y nodejs
-sudo apt-get install npm
+# تثبيت Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    . $HOME/.cargo/env && \
+    rustup default stable && \
+    rustup target add wasm32-unknown-unknown
 
-# تنصيب Rust وتهيئة البيئة
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-source $HOME/.cargo/env || echo "Unable to source Rust environment. Please restart the terminal or source manually."
+# نسخ ملفات المشروع وتثبيت الاعتماديات
+COPY . /app
+WORKDIR /app
+RUN pip install -r requirements.txt
 
-# إعداد بيئة Rust
-rustup default stable
-rustup target add wasm32-unknown-unknown
-cargo install cargo-generate --features vendored-openssl
-cargo install cargo-run-script
-
-# تنصيب Terrain
-npm install -g @terra-money/terrain
-
-echo "تم إكمال التثبيت!"
+# تعليمات لبدء التطبيق
+CMD ["python", "app.py"]
